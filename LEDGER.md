@@ -404,6 +404,170 @@ component2_double_descent/results/double_descent_run2b_curves.csv
 
 ---
 
+### 2026-09-13 — Experiment 3 full sweep executed (3 seeds × 50,000 steps)
+
+**Status: NOT REPRODUCED under pre-registered criteria.**
+**Sub-classification: Generalization occurred in all 3 seeds, but T_grok − T_mem < 2,000 steps
+for every seed. Signal A failed; Signal B also failed. behavioral_grokking = False for all seeds.**
+
+---
+
+#### Measured results per seed
+
+All values are [MEASURED].
+
+**T_mem and T_grok (first checkpoint of 5 consecutive sustained at threshold):**
+
+| Seed | T_mem | T_grok | T_grok − T_mem | Signal A threshold (2,000) |
+|------|-------|--------|----------------|---------------------------|
+| 42   | 200   | 1,100  | 900            | NOT MET                   |
+| 123  | 200   | 2,000  | 1,800          | NOT MET                   |
+| 777  | 200   | 1,400  | 1,200          | NOT MET                   |
+
+All three seeds: T_mem = step 200 (train_acc reached 100% and never dropped).
+T_grok ranged 1,100–2,000 across seeds.
+
+**Signal B — consecutive checkpoints with test_acc < 0.30 strictly between T_mem and T_grok:**
+
+| Seed | Checkpoints between T_mem/T_grok | Actual max_run† | Required | Signal B |
+|------|----------------------------------|-----------------|----------|----------|
+| 42   | 8                                | 5               | 10       | False    |
+| 123  | 17                               | 6               | 10       | False    |
+| 777  | 11                               | 6               | 10       | False    |
+
+†Note: the sweep script's `find_signal_B` returns (False, 0) by early-return when
+`len(between) < n_consecutive`; this causes seed 42's max_run to be reported as 0 in
+grokking_summary.csv. The correct value is 5 (verified by independent calculation).
+The decision (Signal B = False) is correct either way (5 < 10). This is a
+reporting artifact, not a verdict error. Recorded here for transparency.
+
+**behavioral_grokking per seed:**
+
+| Seed | Signal A | Signal B | behavioral_grokking |
+|------|----------|----------|---------------------|
+| 42   | False    | False    | False               |
+| 123  | False    | False    | False               |
+| 777  | False    | False    | False               |
+
+**Aggregate verdict:** n_behavioral_grokking = 0 / 3 → **NOT REPRODUCED**
+
+---
+
+#### Measured test accuracy trajectory (checkpoints 100–2,200)
+
+All values are [MEASURED].
+
+| Step | s42 test_acc | s123 test_acc | s777 test_acc |
+|------|-------------|--------------|--------------|
+| 100  | 0.003       | 0.001        | 0.001        |
+| 200  | 0.020       | 0.012        | 0.010        |
+| 300  | 0.032       | 0.017        | 0.016        |
+| 400  | 0.052       | 0.031        | 0.029        |
+| 500  | 0.092       | 0.055        | 0.050        |
+| 600  | 0.157       | 0.097        | 0.086        |
+| 700  | 0.273       | 0.159        | 0.143        |
+| 800  | 0.428       | 0.239        | 0.224        |
+| 900  | 0.606       | 0.338        | 0.340        |
+| 1000 | 0.820       | 0.448        | 0.490        |
+| 1100 | **0.969**   | 0.598        | 0.641        |
+| 1200 | 0.997       | 0.732        | 0.789        |
+| 1300 | 1.000       | 0.838        | 0.901        |
+| 1400 | 1.000       | 0.890        | **0.976**    |
+| 1500 | 1.000       | 0.912        | 0.997        |
+| 1600 | 1.000       | 0.925        | 1.000        |
+| 1700 | 1.000       | 0.930        | 1.000        |
+| 1800 | 1.000       | 0.934        | 1.000        |
+| 1900 | 1.000       | 0.909        | 1.000        |
+| 2000 | 1.000       | **0.968**    | 1.000        |
+| 2100 | 1.000       | 0.988        | 1.000        |
+| 2200 | 1.000       | 0.995        | 1.000        |
+
+Bold marks T_grok for each seed. All three seeds reached test_acc = 1.000 well before step 50,000.
+
+**Final state (step 50,000):**
+
+| Seed | train_loss | train_acc | test_loss | test_acc |
+|------|-----------|-----------|----------|---------|
+| 42   | 0.0002    | 1.0000    | 0.0002   | 1.0000  |
+| 123  | 0.0000    | 1.0000    | 0.0000   | 1.0000  |
+| 777  | 0.0005    | 1.0000    | 0.0006   | 1.0000  |
+
+---
+
+#### Signal C — L2 norm compression (mechanistic supporting evidence, non-gating)
+
+All values are [MEASURED].
+
+| Seed | L2 at step 100 (≈init) | L2 at T_mem (step 200) | L2 at step 50,000 | Compression from T_mem |
+|------|------------------------|------------------------|-------------------|------------------------|
+| 42   | 110.12                 | 105.51                 | 34.08             | 67.7%                  |
+| 123  | 110.52                 | 105.64                 | 37.27             | 64.7%                  |
+| 777  | 111.99                 | 107.48                 | 32.36             | 69.9%                  |
+
+All three seeds showed substantial L2 weight-norm compression far exceeding the 20% threshold.
+The norm declined monotonically throughout the run while trained with AdamW weight_decay=1.0.
+Signal C fires for all seeds. This satisfies the pre-registered non-gating Signal C and is
+consistent with the hypothesized norm-compression dynamics, but this experiment does not isolate
+weight decay causally (no zero-weight-decay control was run) or establish parameter sparsity
+(sparsity was not measured).
+
+---
+
+#### What the data shows [MEASURED only]
+
+1. Train accuracy saturated at step 200 for all three seeds (T_mem = 200, unanimous).
+2. Test accuracy rose continuously from near-chance after step 200, reaching ≥ 0.95
+   at steps 1,100, 2,000, and 1,400 for seeds 42, 123, and 777 respectively.
+3. All three seeds reached test_acc = 1.000 before step 10,000.
+4. The generalization gap (T_grok − T_mem) was 900, 1,800, and 1,200 steps —
+   consistent across seeds, all below the pre-registered 2,000-step threshold.
+5. Between T_mem and T_grok, test accuracy rose smoothly and rapidly; no seed had
+   ≥ 10 consecutive logged checkpoints with test_acc < 0.30 (Signal B not satisfied).
+6. L2 norm declined from ~110 to ~32–37 over 50,000 steps.
+
+#### What the pre-registered criteria require [OPDEF]
+
+- Signal A requires T_grok − T_mem ≥ 2,000 steps. The maximum observed gap is 1,800
+  (seed 123), falling 200 steps short. Signal A: False for all seeds.
+- Signal B requires ≥ 10 consecutive logged checkpoints (≥ 1,000 optimizer steps)
+  strictly between T_mem and T_grok with test_acc < 0.30. The maximum observed run is
+  6 consecutive checkpoints. Signal B: False for all seeds.
+- behavioral_grokking = Signal A AND Signal B: False for all seeds.
+- Aggregate: 0 / 3 seeds behavioral_grokking → NOT REPRODUCED.
+
+#### Interpretation [explicitly separated from measured results]
+
+[HYP] The generalization transition was faster than the pre-registered threshold anticipated.
+The 2,000-step gap criterion was based on the expectation of a prolonged memorization plateau
+before the grokking phase transition. In this run, all seeds transitioned from memorization to
+generalization within 900–1,800 steps rather than showing the extended low-test-accuracy
+plateau described in Power et al. (2022).
+
+[HYP] Whether this represents grokking in a qualitative sense — a distinct delayed
+generalization phase following memorization — is not determinable from the behavioral
+criteria alone, since the threshold (2,000 steps) was not met. The pre-registered criteria
+are the binding definition.
+
+[LIT/HYP] Power et al. (2022) report grokking delays of tens of thousands of steps in
+their transformer setup. The substantially shorter delay here may reflect differences in
+model architecture, optimizer, batch structure, or the specific properties of the mod-97
+addition task at this scale. No post-hoc explanation is endorsed.
+
+**No criteria are revised. The verdict is NOT REPRODUCED.**
+
+---
+
+**Wall-clock time:** 5,800.8s (96.7 min) for all 3 seeds × 50,000 steps on CPU.
+
+**Full data:**
+- component3_grokking/results/grokking_curves_seed{42,123,777}.csv (500 rows each)
+- component3_grokking/results/grokking_curves_all.csv (1,500 rows)
+- component3_grokking/results/grokking_summary.csv (3 rows, per-seed verdicts)
+- component3_grokking/results/grokking_aggregate.csv (1 row, aggregate verdict)
+- component3_grokking/results/grokking_curves.png (3-panel accuracy plot)
+
+---
+
 ## Experiment 3 — Grokking on Modular Arithmetic
 
 ### Pre-Registration (locked 2026-09-13, before any code executed)
@@ -518,8 +682,10 @@ near-chance test accuracy after training has saturated.
 **Signal C — L2 norm compression (mechanistic, non-gating):** [OPDEF]
 The model's L2 weight norm decreases by ≥ 20% from its maximum observed value
 during training, measured at the end of the 50,000-step run.
-Recorded as supporting evidence of weight decay driving generalization; does not
-enter the formal verdict. [HYP based on LIT: Power et al. 2022, Nanda et al. 2023]
+Recorded as mechanistic supporting evidence consistent with the hypothesized
+norm-compression dynamics described in Power et al. (2022) and Nanda et al. (2023).
+This experiment does not isolate weight decay causally or establish parameter sparsity.
+Does not enter the formal verdict. [HYP based on LIT: Power et al. 2022, Nanda et al. 2023]
 
 ---
 

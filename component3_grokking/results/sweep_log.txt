@@ -1,0 +1,101 @@
+======================================================================
+EXPERIMENT 3 — FULL GROKKING SWEEP
+======================================================================
+p=97  d_model=128  n_heads=4  d_ff=512
+lr=0.001  betas=(0.9, 0.98)  weight_decay=1.0
+budget=50,000  log_every=100  seeds=[42, 123, 777]
+n_train=4704  n_test=4705
+per_class range (train): [32, 60]
+
+======================================================================
+SEED 42
+======================================================================
+  step= 5,000  tr_loss=0.0000  tr_acc=1.0000  te_loss=0.0001  te_acc=1.0000  l2=32.402  (160s)
+  step=10,000  tr_loss=0.0020  tr_acc=1.0000  te_loss=0.0023  te_acc=1.0000  l2=34.351  (319s)
+  step=15,000  tr_loss=0.0000  tr_acc=1.0000  te_loss=0.0000  te_acc=1.0000  l2=35.735  (479s)
+  step=20,000  tr_loss=0.0001  tr_acc=1.0000  te_loss=0.0002  te_acc=1.0000  l2=35.548  (648s)
+  step=25,000  tr_loss=0.0002  tr_acc=1.0000  te_loss=0.0002  te_acc=1.0000  l2=33.857  (823s)
+  step=30,000  tr_loss=0.0000  tr_acc=1.0000  te_loss=0.0000  te_acc=1.0000  l2=35.079  (1000s)
+  step=35,000  tr_loss=0.0001  tr_acc=1.0000  te_loss=0.0001  te_acc=1.0000  l2=35.086  (1179s)
+  step=40,000  tr_loss=0.0005  tr_acc=1.0000  te_loss=0.0006  te_acc=1.0000  l2=34.072  (1366s)
+  step=45,000  tr_loss=0.0107  tr_acc=1.0000  te_loss=0.0128  te_acc=1.0000  l2=34.125  (1593s)
+  step=50,000  tr_loss=0.0002  tr_acc=1.0000  te_loss=0.0002  te_acc=1.0000  l2=34.076  (1816s)
+  Seed 42 complete in 1816.1s
+
+  [MEASURED] T_mem  = 200
+  [MEASURED] T_grok = 1100
+  [MEASURED] T_grok - T_mem = 900 steps
+  [OPDEF]    Signal A (delayed generalization): False
+  [OPDEF]    Signal B (plateau >=10 consec checkpoints <0.30): False  (max_run=0)
+  [OPDEF]    behavioral_grokking: False
+  [MEASURED] Final train_loss=0.0002  train_acc=1.0000
+  [MEASURED] Final test_loss=0.0002  test_acc=1.0000
+  [MEASURED] L2_norm: init=110.123  T_mem=105.51486341542152  end=34.076
+
+======================================================================
+SEED 123
+======================================================================
+  step= 5,000  tr_loss=0.0116  tr_acc=1.0000  te_loss=0.0129  te_acc=1.0000  l2=28.700  (217s)
+  step=10,000  tr_loss=0.0021  tr_acc=1.0000  te_loss=0.0026  te_acc=1.0000  l2=39.893  (409s)
+  step=15,000  tr_loss=0.0056  tr_acc=1.0000  te_loss=0.0065  te_acc=1.0000  l2=36.896  (636s)
+  step=20,000  tr_loss=0.0140  tr_acc=1.0000  te_loss=0.0163  te_acc=1.0000  l2=36.666  (855s)
+  step=25,000  tr_loss=0.0012  tr_acc=1.0000  te_loss=0.0016  te_acc=1.0000  l2=38.408  (1045s)
+  step=30,000  tr_loss=0.0069  tr_acc=1.0000  te_loss=0.0077  te_acc=1.0000  l2=35.278  (1241s)
+  step=35,000  tr_loss=0.0004  tr_acc=1.0000  te_loss=0.0005  te_acc=1.0000  l2=36.304  (1437s)
+  step=40,000  tr_loss=0.0440  tr_acc=1.0000  te_loss=0.0504  te_acc=1.0000  l2=36.673  (1635s)
+  step=45,000  tr_loss=0.0003  tr_acc=1.0000  te_loss=0.0004  te_acc=1.0000  l2=36.775  (1832s)
+  step=50,000  tr_loss=0.0000  tr_acc=1.0000  te_loss=0.0000  te_acc=1.0000  l2=37.271  (2019s)
+  Seed 123 complete in 2019.3s
+
+  [MEASURED] T_mem  = 200
+  [MEASURED] T_grok = 2000
+  [MEASURED] T_grok - T_mem = 1800 steps
+  [OPDEF]    Signal A (delayed generalization): False
+  [OPDEF]    Signal B (plateau >=10 consec checkpoints <0.30): False  (max_run=6)
+  [OPDEF]    behavioral_grokking: False
+  [MEASURED] Final train_loss=0.0000  train_acc=1.0000
+  [MEASURED] Final test_loss=0.0000  test_acc=1.0000
+  [MEASURED] L2_norm: init=110.518  T_mem=105.64312970417804  end=37.271
+
+======================================================================
+SEED 777
+======================================================================
+  step= 5,000  tr_loss=0.0826  tr_acc=0.9934  te_loss=0.1095  te_acc=0.9892  l2=33.867  (222s)
+  step=10,000  tr_loss=0.0020  tr_acc=1.0000  te_loss=0.0024  te_acc=1.0000  l2=34.178  (440s)
+  step=15,000  tr_loss=0.0049  tr_acc=1.0000  te_loss=0.0066  te_acc=1.0000  l2=36.890  (655s)
+  step=20,000  tr_loss=0.0001  tr_acc=1.0000  te_loss=0.0001  te_acc=1.0000  l2=35.116  (857s)
+  step=25,000  tr_loss=0.0026  tr_acc=1.0000  te_loss=0.0031  te_acc=1.0000  l2=32.964  (1037s)
+  step=30,000  tr_loss=0.0091  tr_acc=1.0000  te_loss=0.0107  te_acc=1.0000  l2=32.955  (1212s)
+  step=35,000  tr_loss=0.0000  tr_acc=1.0000  te_loss=0.0000  te_acc=1.0000  l2=35.548  (1406s)
+  step=40,000  tr_loss=0.0017  tr_acc=1.0000  te_loss=0.0021  te_acc=1.0000  l2=32.429  (1596s)
+  step=45,000  tr_loss=0.0071  tr_acc=1.0000  te_loss=0.0083  te_acc=1.0000  l2=31.675  (1783s)
+  step=50,000  tr_loss=0.0005  tr_acc=1.0000  te_loss=0.0006  te_acc=1.0000  l2=32.360  (1965s)
+  Seed 777 complete in 1964.9s
+
+  [MEASURED] T_mem  = 200
+  [MEASURED] T_grok = 1400
+  [MEASURED] T_grok - T_mem = 1200 steps
+  [OPDEF]    Signal A (delayed generalization): False
+  [OPDEF]    Signal B (plateau >=10 consec checkpoints <0.30): False  (max_run=6)
+  [OPDEF]    behavioral_grokking: False
+  [MEASURED] Final train_loss=0.0005  train_acc=1.0000
+  [MEASURED] Final test_loss=0.0006  test_acc=1.0000
+  [MEASURED] L2_norm: init=111.995  T_mem=107.48300981878093  end=32.360
+
+======================================================================
+AGGREGATE VERDICT (pre-registered criteria applied mechanically)
+======================================================================
+  seed= 42  T_mem=200  T_grok=1100  behavioral_grokking=False
+  seed=123  T_mem=200  T_grok=2000  behavioral_grokking=False
+  seed=777  T_mem=200  T_grok=1400  behavioral_grokking=False
+
+  n_behavioral_grokking = 0 / 3
+  VERDICT: NOT REPRODUCED
+  Total elapsed: 5800.8s (96.7 min)
+
+Files saved:
+  /Users/boatismbair/week01-gradient-ledger/component3_grokking/results/grokking_curves_all.csv
+  /Users/boatismbair/week01-gradient-ledger/component3_grokking/results/grokking_summary.csv
+  /Users/boatismbair/week01-gradient-ledger/component3_grokking/results/grokking_aggregate.csv
+  /Users/boatismbair/week01-gradient-ledger/component3_grokking/results/grokking_curves.png
+
