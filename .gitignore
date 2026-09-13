@@ -1,0 +1,37 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+.env
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# PyTorch checkpoints (large binary files, not experiment outputs)
+*.pt
+*.pth
+*.ckpt
+
+# Experiment outputs we DO want to keep:
+# - component*/results/*.csv   (raw data)
+# - component*/results/*.png   (figures)
+# - LEDGER.md                  (experiment record)
+# None of the above are excluded here.
