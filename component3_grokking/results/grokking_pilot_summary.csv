@@ -1,0 +1,2 @@
+n_params,n_train,n_test,per_class_min,per_class_max,start_step,start_train_loss,start_train_acc,start_test_loss,start_test_acc,start_l2_norm,end_train_loss,end_train_acc,end_test_loss,end_test_acc,end_l2_norm,gradients_ok,trigger_fired,secs_per_step,projected_per_seed_secs,projected_3seeds_secs
+223457,4704,4705,32,60,10,4.529055118560791,0.017006803303956985,4.7604193687438965,0.0046758768148720264,114.5047806867275,0.0011065754806622863,1.0,11.381110191345215,0.09160467237234116,86.10829327591222,True,False,0.03246228167427762,1623.1140837138812,4869.342251141644

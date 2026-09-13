@@ -111,5 +111,64 @@ EXP2_RUN2B_EPOCHS      = 10_000
 EXP2_RUN2B_LOG_EVERY   = 500    # 20 rows per run (same epoch cadence as Run 1)
 
 # ---------------------------------------------------------------------------
-# Experiment 3 will be added here after Experiment 2 is authorized.
+# Experiment 3: Grokking on modular arithmetic (mod p addition)
 # ---------------------------------------------------------------------------
+
+# Modulus p. All ordered pairs (a,b) with 0 <= a,b < p: p^2 = 9409 samples.
+EXP3_P              = 97
+
+# Architecture: 1-layer transformer
+# Shared token embedding + 2 positional embeddings + TransformerEncoderLayer + linear head.
+EXP3_D_MODEL        = 128   # embedding dimension; [OPDEF]
+EXP3_N_HEADS        = 4     # attention heads (d_head = 32); [OPDEF]
+EXP3_D_FF           = 512   # feedforward hidden dimension; [OPDEF]
+
+# Optimizer: AdamW
+# Weight decay = 1.0 is the primary grokking pressure described in Power et al. (2022). [LIT]
+EXP3_LR             = 1e-3          # [LIT] matches Power et al. (2022)
+EXP3_BETAS          = (0.9, 0.98)   # [LIT] matches Power et al. (2022)
+EXP3_WEIGHT_DECAY   = 1.0           # [LIT] matches Power et al. (2022)
+
+# Data split: random 50/50 of all 9409 ordered pairs using
+# np.random.default_rng(EXP3_SPLIT_SEED).permutation(p*p).
+# Random (not stratified) split matches Power et al. (2022) convention. [LIT]
+EXP3_TRAIN_FRACTION = 0.5
+EXP3_SPLIT_SEED     = 0
+
+# Training budget and seeds
+EXP3_BUDGET         = 50_000        # full-batch AdamW optimizer steps; [OPDEF]
+EXP3_SEEDS          = [42, 123, 777]
+EXP3_LOG_EVERY      = 100           # checkpoint cadence for the full experiment
+
+# --- Pilot ---
+# 500 full-batch steps with seed=42. Purpose: verify numerical stability and
+# measure throughput. No hyperparameter changes permitted except:
+# Trigger: if any 50-step block shows relative loss increase > 5%, lr is reduced
+# to 3e-4 before the full experiment is run. [OPDEF]
+EXP3_PILOT_SEED                 = 42
+EXP3_PILOT_STEPS                = 500
+EXP3_PILOT_LOG_EVERY            = 10
+EXP3_PILOT_STABILITY_THRESHOLD  = 0.05   # fractional loss increase to fire trigger
+EXP3_PILOT_LR_FALLBACK          = 3e-4   # lr if trigger fires [OPDEF]
+
+# --- Full-experiment evidence criteria (pre-registered) ---
+# T_mem: the earliest logged checkpoint where train_acc >= EXP3_T_MEM_THRESHOLD
+#        and train_acc remains >= threshold for EXP3_STABILITY_CHECKPOINTS
+#        consecutive logged checkpoints.
+# T_grok: same definition but for test_acc >= EXP3_T_GROK_THRESHOLD.
+# At EXP3_LOG_EVERY=100 steps, EXP3_STABILITY_CHECKPOINTS=5 → 500-step window.
+EXP3_T_MEM_THRESHOLD        = 0.99   # [OPDEF]
+EXP3_T_GROK_THRESHOLD       = 0.95   # [OPDEF]
+EXP3_STABILITY_CHECKPOINTS  = 5      # consecutive logged checkpoints [OPDEF]
+
+# Signal A = T_mem defined AND T_grok defined AND T_grok - T_mem >= this value.
+EXP3_GROK_GAP_MIN           = 2_000  # optimizer steps [OPDEF]
+
+# Signal B = at least EXP3_SIGNAL_B_CHECKPOINTS consecutive logged checkpoints
+# between T_mem and T_grok where test_acc < EXP3_SIGNAL_B_LOW_ACC.
+# At EXP3_LOG_EVERY=100, EXP3_SIGNAL_B_CHECKPOINTS=10 → >= 1,000 optimizer steps.
+EXP3_SIGNAL_B_LOW_ACC       = 0.30   # [OPDEF]
+EXP3_SIGNAL_B_CHECKPOINTS   = 10     # consecutive logged checkpoints [OPDEF]
+
+# behavioral_grokking = Signal A AND Signal B.
+# Aggregate REPRODUCED requires behavioral_grokking for >= 2 of 3 seeds.

@@ -401,3 +401,175 @@ All seeds: test_error(H=512) ≈ 10-11% < test_error(H=32) ≈ 24%. Substantial.
 
 **Full data:** component2_double_descent/results/double_descent_run2b_raw.csv,
 component2_double_descent/results/double_descent_run2b_curves.csv
+
+---
+
+## Experiment 3 — Grokking on Modular Arithmetic
+
+### Pre-Registration (locked 2026-09-13, before any code executed)
+
+---
+
+#### 3.1 Scientific question
+
+Can a one-layer transformer trained on modular addition (a + b ≡ c mod 97) exhibit
+grokking: a phase transition from near-random test accuracy to high test accuracy
+that occurs long after training accuracy has saturated? [HYP, based on LIT: Power et al. 2022]
+
+---
+
+#### 3.2 Dataset
+
+- All p² = 97² = 9,409 ordered pairs (a, b) with a, b ∈ {0, …, 96}. [OPDEF]
+- Labels: y = (a + b) mod 97 (one of p=97 classes). [OPDEF]
+- Random 50/50 train/test split using np.random.default_rng(EXP3_SPLIT_SEED=0).permutation(9409).
+  Split is not stratified — matches Power et al. (2022) convention. [LIT]
+- n_train ≈ 4705, n_test ≈ 4704. [OPDEF; exact counts depend on floor(9409 × 0.5)]
+
+**Note on commutative pairs:** Approximately 50% of test pairs have their commuted
+partner (b, a) in the training set. This is accepted as the literature convention
+for this benchmark. It means test performance reflects generalization to orderings
+and compositions not in training, not to entirely unseen operand pairs. [LIT, OPDEF]
+
+---
+
+#### 3.3 Architecture
+
+1-layer transformer:
+- Shared token embedding: nn.Embedding(97, 128) [OPDEF]
+- Positional embedding: nn.Embedding(2, 128) — position 0 for operand a, position 1 for operand b [OPDEF]
+- One TransformerEncoderLayer: d_model=128, n_heads=4, d_ff=512, activation=gelu,
+  pre-norm (norm_first=True), dropout=0.0 [OPDEF]
+- Mean pooling over the 2-token sequence [OPDEF]
+- Output linear head: nn.Linear(128, 97) [OPDEF]
+
+Motivation for pre-norm and gelu: aligns with modern transformer conventions
+and the original grokking paper's setup. [LIT]
+
+---
+
+#### 3.4 Optimizer
+
+AdamW with lr=1e-3, betas=(0.9, 0.98), weight_decay=1.0. [LIT: Power et al. 2022]
+Full-batch gradient descent (batch_size = n_train ≈ 4705 each step). [OPDEF]
+Weight decay = 1.0 is the primary mechanism proposed in Power et al. (2022) to
+induce the grokking phase transition. [LIT]
+No learning rate schedule. [OPDEF]
+
+---
+
+#### 3.5 Training budget and seeds
+
+Budget: 50,000 full-batch optimizer steps per seed. [OPDEF]
+Seeds: [42, 123, 777] for model initialization (torch.manual_seed). [OPDEF]
+Split seed: 0 (fixed; same split for all seeds). [OPDEF]
+Logging: every 100 steps (500 checkpoints per seed). [OPDEF]
+
+---
+
+#### 3.6 Pilot
+
+**Pilot parameters (seed=42 only, 500 steps, log every 10 steps):**
+Purpose: verify numerical stability and measure throughput.
+Permits one conditional hyperparameter change:
+
+**Stability Trigger:** If any 50-step block shows a relative train loss increase
+> 5% over the previous block's final logged value, the trigger fires and lr is
+reduced to 3e-4 for all three full-experiment seeds. [OPDEF]
+
+No other changes are permitted regardless of pilot outcomes.
+Pilot data is saved to component3_grokking/results/grokking_pilot_curves.csv.
+
+---
+
+#### 3.7 Pre-registered evidence criteria
+
+The grokking verdict is determined by behavioral signals (A and B) alone.
+Signal C (L2 norm) is recorded as mechanistic supporting evidence but does
+NOT gate the verdict.
+
+**Definitions:**
+
+T_mem = the earliest logged checkpoint where train_acc ≥ 0.99 AND train_acc
+remains ≥ 0.99 for at least 5 consecutive logged checkpoints. With the full
+experiment logging every 100 steps, this is a 500-step stability window.
+[OPDEF] If no such checkpoint exists, T_mem is undefined.
+
+T_grok = the earliest logged checkpoint where test_acc ≥ 0.95 AND test_acc
+remains ≥ 0.95 for at least 5 consecutive logged checkpoints (500-step window).
+[OPDEF] If no such checkpoint exists, T_grok is undefined.
+
+**Signal A — Delayed generalization:** [OPDEF]
+Signal A fires if and only if:
+  (i)  T_mem is defined, AND
+  (ii) T_grok is defined, AND
+  (iii) T_grok − T_mem ≥ 2,000 optimizer steps.
+Condition (iii) enforces that generalization is genuinely delayed relative to
+memorization, not simply simultaneous with it.
+
+**Signal B — Memorization plateau before generalization:** [OPDEF]
+Signal B fires if and only if there exist at least 10 consecutive logged
+checkpoints, all lying strictly between T_mem and T_grok, at which test_acc < 0.30.
+At EXP3_LOG_EVERY=100 steps, this corresponds to ≥ 1,000 optimizer steps with
+near-chance test accuracy after training has saturated.
+
+**behavioral_grokking = Signal A AND Signal B.** [OPDEF]
+
+**Signal C — L2 norm compression (mechanistic, non-gating):** [OPDEF]
+The model's L2 weight norm decreases by ≥ 20% from its maximum observed value
+during training, measured at the end of the 50,000-step run.
+Recorded as supporting evidence of weight decay driving generalization; does not
+enter the formal verdict. [HYP based on LIT: Power et al. 2022, Nanda et al. 2023]
+
+---
+
+#### 3.8 Aggregate verdict (pre-registered, mutually exclusive)
+
+behavioral_grokking is evaluated independently for each of the 3 seeds.
+
+- k ≥ 2 seeds have behavioral_grokking = True  → **REPRODUCED**
+- k = 1 seed  has behavioral_grokking = True   → **PARTIAL**
+- k = 0 seeds have behavioral_grokking = True  → **NOT REPRODUCED**
+  - If k ≥ 2 seeds have T_mem defined but T_grok undefined: NOT REPRODUCED — MEMORIZATION ONLY
+  - If k ≥ 2 seeds have T_mem undefined: NOT REPRODUCED — TRAINING FAILED
+
+No criteria will be adjusted after examining any results.
+
+---
+
+#### 3.9 What will be recorded
+
+For each seed:
+- Final train/test loss and accuracy (step 50,000)
+- T_mem (or "undefined")
+- T_grok (or "undefined")
+- behavioral_grokking verdict (True/False) with Signal A and Signal B sub-verdicts
+- L2 norm at step 0 (init), at T_mem (if defined), and at step 50,000
+- Wall-clock runtime
+
+All data saved to component3_grokking/results/.
+
+---
+
+#### 3.10 Implementation-review discrepancy (caught before full experiment)
+
+**Date:** 2026-09-13
+**Status at time of discovery:** Pilot (500 steps, seed=42) complete; full experiment NOT yet run.
+
+The initial code implementation of the pre-registration contained three errors
+relative to the approved pre-registration text:
+
+| # | What was implemented | What the pre-registration requires | Correction |
+|---|---|---|---|
+| 1 | Signal A: "train_acc ≥ 99% for 5,000 optimizer steps" | T_mem/T_grok defined as 5 consecutive *logged checkpoints* (500-step window at log_every=100) | Fixed in LEDGER §3.7 and config.py |
+| 2 | Signal B: "test_acc rises from < 60% to ≥ 90%" | ≥ 10 consecutive checkpoints with test_acc < 0.30 between T_mem and T_grok | Fixed in LEDGER §3.7 and config.py |
+| 3 | Pilot LR contingency: reduced to 1e-4 if trigger fires | Approved value was 3e-4 | Fixed in LEDGER §3.6 and config.py |
+
+**Effect on pilot data:** None. The pilot trigger did not fire, so the LR contingency
+value is irrelevant to the pilot result. The pilot CSV files (grokking_pilot_curves.csv,
+grokking_pilot_summary.csv) are preserved exactly as generated and are unaffected
+by this correction.
+
+**Effect on full experiment:** None yet — the full experiment has not been run.
+The corrected criteria are now locked in config.py and LEDGER.md before any
+full-experiment outcomes are examined.
