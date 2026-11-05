@@ -1,3 +1,6 @@
+> **Applied AI portfolio project by Brent Oatis, MBA**
+> Examining optimization behavior, convergence, and training stability for dependable model development.
+
 # The Gradient Ledger
 
 **Course:** CST 627 — Week 01
